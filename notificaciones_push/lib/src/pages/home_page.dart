@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:notificaciones_push/src/models/usuario_models.dart';
+import 'package:notificaciones_push/src/pages/qr_page.dart';
 import 'package:notificaciones_push/src/servicio/db_service.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key);
@@ -31,32 +33,51 @@ class _HomePageState extends State<HomePage> {
         title: Text('Chat'),
       ),
       body: _listUsersCards(),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.filter_center_focus),
-        onPressed: () async {
-          try {
-            String jsonString = await FlutterBarcodeScanner.scanBarcode(
-                '#00FF00', "Cancelar", true, ScanMode.QR);
+      floatingActionButton: _botonesInferiores(),
+    );
+  }
 
-            if (jsonString.isNotEmpty) {
-              final jsonResponse = jsonDecode(jsonString);
-              UsuarioModel user = UsuarioModel(
-                token: jsonResponse['token'],
-                key: jsonResponse['key'],
-                usuario: jsonResponse['usuario'],
-                urlAvatar: jsonResponse['urlAvatar'],
+  _botonesInferiores() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        FloatingActionButton(
+            heroTag: "btnRest",
+            child: Icon(Icons.qr_code),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => GenerateScreen()),
               );
+            }),
+        FloatingActionButton(
+          heroTag: "btnRest1",
+          child: Icon(Icons.filter_center_focus),
+          onPressed: () async {
+            try {
+              String jsonString = await FlutterBarcodeScanner.scanBarcode(
+                  '#00FF00', "Cancelar", true, ScanMode.QR);
 
-              service.insertUser(user);
-              // service.getUsers();
+              if (jsonString.isNotEmpty) {
+                final jsonResponse = jsonDecode(jsonString);
+                UsuarioModel user = UsuarioModel(
+                  token: jsonResponse['token'],
+                  key: jsonResponse['key'],
+                  usuario: jsonResponse['usuario'],
+                  urlAvatar: jsonResponse['urlAvatar'],
+                );
+
+                service.insertUser(user);
+                // service.getUsers();
+              }
+
+              setState(() {});
+            } catch (e) {
+              print(e);
             }
-
-            setState(() {});
-          } catch (e) {
-            print(e);
-          }
-        },
-      ),
+          },
+        ),
+      ],
     );
   }
 
@@ -107,7 +128,8 @@ class _HomePageState extends State<HomePage> {
             ListTile(
               title: Text(elem.usuario),
               onTap: () {
-                Navigator.pushNamed(context, 'message',arguments:elem.usuario );
+                Navigator.pushNamed(context, 'message',
+                    arguments: elem.usuario);
               },
             ),
             const Divider(),
@@ -194,5 +216,4 @@ class _HomePageState extends State<HomePage> {
     _usersList = await DBService.dbPublic.getUsers();
     return _usersList;
   }
-
 }
