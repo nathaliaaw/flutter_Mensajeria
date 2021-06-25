@@ -1,13 +1,19 @@
-
 import 'package:flutter/material.dart';
 
 import 'package:notificaciones_push/src/pages/home_page.dart';
 import 'package:notificaciones_push/src/pages/mensaje_page.dart';
 import 'package:notificaciones_push/src/pages/qr_page.dart';
+import 'package:notificaciones_push/src/preferencia/general_preferencias.dart';
+import 'package:notificaciones_push/src/provider/user_Provider.dart';
 import 'package:notificaciones_push/src/servicio/notificacion_push_servicio.dart';
+import 'package:notificaciones_push/src/servicio/pushNotification_Service.dart';
+import 'package:provider/provider.dart';
+
 
 void main() async {
+    final preferences=GeneralPreferences();
   WidgetsFlutterBinding.ensureInitialized();
+  await preferences.initPreferences();   
   await PushNotificationService.initializeApp();
 
   runApp(MyApp());
@@ -41,17 +47,38 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Material App',
-      initialRoute: 'home',
-      navigatorKey: navigatorKey, // Navegar
-      scaffoldMessengerKey: messengerKey, // Snacks
-      routes: {
-        'home': (_) => HomePage(),
-        'message': (_) => MensajePage(),
-        'generate': (_) => GenerateScreen(),
-      },
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => UserProvider(),
+        ),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Material App',
+        initialRoute: 'home',
+        navigatorKey: navigatorKey, // Navegar
+        scaffoldMessengerKey: messengerKey, // Snacks
+        theme: ThemeData.dark(),
+        routes: {
+          'home': (_) => HomePage(),
+          'message': (_) => MessagePage(),
+          'generate': (_) => GenerateScreen(),
+        },
+      ),
     );
+    // return MaterialApp(
+    //   debugShowCheckedModeBanner: false,
+    //   title: 'Material App',
+    //   initialRoute: 'home',
+    //   navigatorKey: navigatorKey, // Navegar
+    //   scaffoldMessengerKey: messengerKey, // Snacks
+    //   routes: {
+    //     'home': (_) => HomePage(),
+    //     'message': (_) => MessagePage(),
+    //     'generate': (_) => GenerateScreen(),
+    //   },
+    // );
+ 
   }
 }
