@@ -1,10 +1,11 @@
-class MensajeModel {
+class MessageNotifyModel {
   int id;
-  String body;
-  DateTime fecha = DateTime.now();
+  String bodyMessage;
+  String creationDate ;
 
-  MensajeModel({
+  MessageNotifyModel({
     this.id = 0,
-    this.body = '',
+    this.bodyMessage = '',
+    this.creationDate = '',
   });
 }

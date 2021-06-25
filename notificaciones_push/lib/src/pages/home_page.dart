@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:notificaciones_push/src/models/usuario_models.dart';
 import 'package:notificaciones_push/src/pages/qr_page.dart';
+import 'package:notificaciones_push/src/provider/user_Provider.dart';
 import 'package:notificaciones_push/src/servicio/db_service.dart';
+import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class HomePage extends StatefulWidget {
@@ -16,8 +18,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String textoLeido = '';
-  DBService service = DBService();
-  List<UsuarioModel> _usersList = <UsuarioModel>[];
+  DbService service = DbService();
+  List<UsersModel> _usersList = <UsersModel>[];
 
   @override
   void initState() {
@@ -27,7 +29,7 @@ class _HomePageState extends State<HomePage> {
 
   // @override
   Widget build(BuildContext context) {
-    DBService.dbPublic.instanceBD;
+    DbService.dbPublic.instanceBD;
     return Scaffold(
       appBar: AppBar(
         title: Text('Chat'),
@@ -60,11 +62,11 @@ class _HomePageState extends State<HomePage> {
 
               if (jsonString.isNotEmpty) {
                 final jsonResponse = jsonDecode(jsonString);
-                UsuarioModel user = UsuarioModel(
+                UsersModel user = UsersModel(
                   token: jsonResponse['token'],
                   key: jsonResponse['key'],
                   usuario: jsonResponse['usuario'],
-                  urlAvatar: jsonResponse['urlAvatar'],
+                  url_avatar: jsonResponse['url_avatar'],
                 );
 
                 service.insertUser(user);
@@ -95,7 +97,7 @@ class _HomePageState extends State<HomePage> {
   // }
 
   Widget _listUsersCards() {
-    return FutureBuilder<List<UsuarioModel>>(
+    return FutureBuilder<List<UsersModel>>(
       future: _getUsers(),
       builder: (
         BuildContext context,
@@ -120,6 +122,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   List<Widget> _listUsers(List<dynamic> data, BuildContext context) {
+    final userProv = Provider.of<UserProvider>(context);
     if (data.isNotEmpty) {
       return _usersList.map((elem) {
         // final item = _users[index];
@@ -128,8 +131,9 @@ class _HomePageState extends State<HomePage> {
             ListTile(
               title: Text(elem.usuario),
               onTap: () {
-                Navigator.pushNamed(context, 'message',
-                    arguments: elem.usuario);
+                userProv.addUser(elem); // fill provider
+
+                Navigator.pushNamed(context, 'message');
               },
             ),
             const Divider(),
@@ -212,8 +216,8 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<List<UsuarioModel>> _getUsers() async {
-    _usersList = await DBService.dbPublic.getUsers();
+  Future<List<UsersModel>> _getUsers() async {
+    _usersList = await DbService.dbPublic.getUsers();
     return _usersList;
   }
 }

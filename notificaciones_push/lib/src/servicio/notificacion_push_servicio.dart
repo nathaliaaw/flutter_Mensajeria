@@ -1,60 +1,42 @@
-import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+class NotificationService {
+  final String urlServ = 'https://fcm.googleapis.com/fcm/send';
 
-class PushNotificationService {
-  static FirebaseMessaging messaging = FirebaseMessaging.instance;
-  static String? token;
-  static StreamController<String> _messageStream =
-      new StreamController.broadcast();
-  static Stream<String> get messagesStream => _messageStream.stream;
+  Future<Map<String, dynamic>> sendNotification({
+    String? key,
+    String? userTokenSender,
+    String? token,
+    String? message,
+  }) async {
+    final headers = {
+      'Authorization': 'key=$key',
+      'Content-Type': 'application/json'
+    };
+    final request = http.Request('POST', Uri.parse(urlServ));
+    request.body = json.encode({
+      "notification": {
+        "body": "Texto del push",
+        "title": "Titulo pruebas",
+      },
+      "priority": "high",
+      "data": {
+        "clave": message,
+        "tokenUserSender":userTokenSender        ,
+      },
+      "to": token
+    });
+    request.headers.addAll(headers);
 
-  static Future _backgroundHandler(RemoteMessage message) async {
-    print('onBackground');
-    print(message.data);
-    _messageStream.add(message.data['clave'] ?? 'No hay datos');
-  }
+    http.StreamedResponse response = await request.send();
 
-  static Future _onMessageHandler(RemoteMessage message) async {
-    print('onMessage');
-    print(message.data);
-    _messageStream.add(message.data['clave'] ?? 'No hay datos');
-  }
-
-  static Future _onMessageOpenApp(RemoteMessage message) async {
-    print('onMessageOpenApp');
-    print(message.data);
-    _messageStream.add(message.data['clave'] ?? 'No hay datos');
-  }
-
-  static Future initializeApp() async {
-    await Firebase.initializeApp();
-    await requestPermission();
-
-    token = await FirebaseMessaging.instance.getToken();
-    print('Token de la aplicacion : $token');
-
-    // Handlers
-    FirebaseMessaging.onBackgroundMessage(_backgroundHandler);
-    FirebaseMessaging.onMessage.listen(_onMessageHandler);
-    FirebaseMessaging.onMessageOpenedApp.listen(_onMessageOpenApp);
-  }
-
-  static requestPermission() async {
-    NotificationSettings settings = await messaging.requestPermission(
-        alert: true,
-        announcement: false,
-        badge: true,
-        carPlay: false,
-        criticalAlert: false,
-        provisional: false,
-        sound: true);
-
-    print('User push notification status ${settings.authorizationStatus}');
-  }
-
-  static closeStreams() {
-    _messageStream.close();
+    if (response.statusCode == 200) {
+      Map<String, dynamic> dataResponse =
+          json.decode(await response.stream.bytesToString());
+      return dataResponse;
+    } else {
+      return throw Exception("Falló al enviar la notificación");
+    }
   }
 }
