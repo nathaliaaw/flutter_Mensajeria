@@ -1,7 +1,9 @@
 
 import 'package:flutter/material.dart';
+
 import 'package:notificaciones_push/src/pages/home_page.dart';
 import 'package:notificaciones_push/src/pages/mensaje_page.dart';
+import 'package:notificaciones_push/src/pages/qr_page.dart';
 import 'package:notificaciones_push/src/servicio/notificacion_push_servicio.dart';
 
 void main() async {
@@ -48,6 +50,7 @@ class _MyAppState extends State<MyApp> {
       routes: {
         'home': (_) => HomePage(),
         'message': (_) => MensajePage(),
+        'generate': (_) => GenerateScreen(),
       },
     );
   }
