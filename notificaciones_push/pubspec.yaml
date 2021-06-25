@@ -28,6 +28,9 @@ dependencies:
   flutter_barcode_scanner: ^2.0.0
   path_provider: ^2.0.2
   sqflite: ^2.0.0+3
+  # path_provider: 0.4.1
+  barcode_scan: ^1.0.0
+  qr_flutter: ^4.0.0
 
 
 
