@@ -9,6 +9,7 @@ class UserProvider extends ChangeNotifier {
 
   void addUser(UsersModel user) {
     _user = <String, dynamic>{
+      "id": user.id,
       "token": user.token,
       "key": user.key,
       "usuario": user.usuario,
