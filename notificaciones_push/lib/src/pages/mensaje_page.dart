@@ -18,18 +18,18 @@ class MessagePage extends StatefulWidget {
 class _MessagePageState extends State<MessagePage> {
   DbService service = DbService();
   NotificationService notification = NotificationService();
-  List<MessageNotifyModel> _messageList = <MessageNotifyModel>[];
+  List<MessageUserModel> _messageList = <MessageUserModel>[];
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final _ctrlMessages = TextEditingController();
   late Map<String, dynamic> _user;
   late Map<String, dynamic> _message;
   final _preferences = GeneralPreferences();
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _getMessages();
-  // }
+  @override
+  void initState() {
+    super.initState();
+    _getMessages();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +101,7 @@ class _MessagePageState extends State<MessagePage> {
                     );
                     insertMessage();
                     _formKey.currentState!.reset();
-
+                    FocusScope.of(context).requestFocus(new FocusNode());
                   },
                   style: ElevatedButton.styleFrom(
                     primary: Colors.green,
@@ -129,11 +129,11 @@ class _MessagePageState extends State<MessagePage> {
         bodyMessage: _ctrlMessages.text,
         creationDate: DateTime.now().toString(),
       );
-      final messageId=await service.insertMessage(msgObj);
-      MessageUserModel msgUser=MessageUserModel(
-        tokenUserSender :_message['token'],
+      final messageId = await service.insertMessage(msgObj);
+      MessageUserModel msgUser = MessageUserModel(
+        tokenUserSender: _message['token'],
         idMessage: messageId,
-        // idUser:_message['id'],
+        idUser: _message['id'],
       );
       await service.insertMessageUser(msgUser);
     } catch (e) {}
@@ -141,7 +141,7 @@ class _MessagePageState extends State<MessagePage> {
 
   Widget _messageHistory() {
     final size = MediaQuery.of(context).size;
-    return FutureBuilder<List<MessageNotifyModel>>(
+    return FutureBuilder<List<MessageUserModel>>(
         future: _getMessages(),
         builder: (
           BuildContext context,
@@ -157,7 +157,7 @@ class _MessagePageState extends State<MessagePage> {
                 decoration: BoxDecoration(
                     border: Border.all(color: Colors.blueAccent),
                     borderRadius: BorderRadius.circular(40)),
-                child: Column(
+                child: ListView(
                   children: _listMessage(),
                 ),
               );
@@ -180,8 +180,12 @@ class _MessagePageState extends State<MessagePage> {
 
   List<Widget> _listMessage() {
     return _messageList.map((elem) {
+      final isUser = (elem.idUser != 0) ? elem.idUser == _message['id'] : false;
       return Column(
-        children: [_mensajesEntrantes(Colors.white, elem.bodyMessage)],
+        children: [
+          _mensajesEntrantes(
+              isUser ? Colors.blueGrey : Colors.blueAccent, elem.bodyMessage),
+        ],
       );
     }).toList();
   }
@@ -214,9 +218,9 @@ class _MessagePageState extends State<MessagePage> {
     );
   }
 
-  Future<List<MessageNotifyModel>> _getMessages() async {
+  Future<List<MessageUserModel>> _getMessages() async {
     _messageList =
-        await DbService.dbPublic.getMessageByIdUser(_message['token']);
+        (await DbService.dbPublic.getMessageByIdUser(_message['token']));
     return _messageList;
   }
 }

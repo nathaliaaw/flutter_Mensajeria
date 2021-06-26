@@ -129,6 +129,7 @@ class _HomePageState extends State<HomePage> {
         return Column(
           children: [
             ListTile(
+              
               title: Text(elem.usuario),
               onTap: () {
                 userProv.addUser(elem); // fill provider
@@ -145,76 +146,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  List<Widget> _listaUsers(List<dynamic> data, BuildContext context) {
-    if (data.isNotEmpty) {
-      return _usersList.map((elem) {
-        // final item = _users[index];
-        return Column(
-          children: [
-            Dismissible(
-              direction: DismissDirection.endToStart,
-              confirmDismiss: (DismissDirection direction) async {
-                return await showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text("Advertencia"),
-                      content:
-                          const Text("Estas seguro de eliminar este registro?"),
-                      actions: <Widget>[
-                        ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              primary: Colors.redAccent,
-                              elevation: 5.0,
-                            ),
-                            onPressed: () {
-                              setState(
-                                () {
-                                  // BDusa.dbPublic.deleteUserById(elem.id);
-                                  _getUsers();
-                                  Navigator.of(context).pop(false);
-                                },
-                              );
-                            },
-                            child: const Text("Eliminar")),
-                        ElevatedButton(
-                          onPressed: () => Navigator.of(context).pop(false),
-                          child: const Text("Cancelar"),
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-              background: Container(
-                padding: const EdgeInsets.all(20.0),
-                color: Colors.redAccent,
-                child: const Align(
-                  alignment: Alignment.centerRight,
-                  child: Icon(
-                    Icons.remove,
-                    size: 20.0,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              key: Key(
-                elem.id.toString(),
-              ),
-              child: ListTile(
-                title: Text(elem.usuario),
-                subtitle: Text(elem.usuario),
-                onTap: () {},
-              ),
-            ),
-            const Divider(),
-          ],
-        );
-      }).toList();
-    } else {
-      return [];
-    }
-  }
 
   Future<List<UsersModel>> _getUsers() async {
     _usersList = await DbService.dbPublic.getUsers();
