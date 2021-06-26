@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:notificaciones_push/src/models/mensaje_usuario_model.dart';
 import 'package:notificaciones_push/src/models/mesajes_model.dart';
 import 'package:notificaciones_push/src/models/usuario_models.dart';
@@ -49,6 +48,7 @@ class DbService {
       CREATE TABLE message_user(
           idMessage_user INTEGER PRIMARY KEY,
           tokenUserSender TEXT,
+          idUser int,
           idMessage int
         )
       ''');
@@ -73,7 +73,7 @@ class DbService {
   Future<int> insertMessageUser(MessageUserModel msgUser) async {
     final bd = await instanceBD;
     final int response = await bd!.rawInsert(
-        "INSERT INTO message_user(tokenUserSender, idMessage) VALUES('${msgUser.tokenUserSender}', '${msgUser.idMessage}')");
+        "INSERT INTO message_user(tokenUserSender, idUser, idMessage) VALUES('${msgUser.tokenUserSender}', '${msgUser.idUser}', '${msgUser.idMessage}')");
     return response;
   }
 
@@ -110,22 +110,24 @@ class DbService {
     );
   }
 
-  Future<List<MessageNotifyModel>> getMessageByIdUser(
+  Future<List<MessageUserModel>> getMessageByIdUser(
       String tokenUserSender) async {
     final bd = await instanceBD;
     // await bd!.rawQuery('user')
     final List<Map<String, dynamic>> message = await bd!.rawQuery(
-        'SELECT m.id, m.bodyMessage, m.creationDate FROM message m LEFT JOIN message_user mu on m.id = mu.idMessage where mu.tokenUserSender=?',
+        'SELECT m.id, m.bodyMessage,mu.idUser, mu.tokenUserSender,mu.idMessage, m.creationDate FROM message m LEFT JOIN message_user mu on m.id = mu.idMessage where mu.tokenUserSender=?',
         [tokenUserSender]);
 
     if (message.isNotEmpty) {
       return List.generate(
         message.length,
         (i) {
-          return MessageNotifyModel(
+          return MessageUserModel(
             id: message[i]['id'] as int,
+            tokenUserSender: message[i]['tokenUserSender'] as String,
             bodyMessage: message[i]['bodyMessage'] as String,
-            creationDate: message[i]['creationDate'] as String,
+            idMessage: message[i]['idMessage'] as int,
+            idUser: message[i]['idUser'] as int,
           );
         },
       );
