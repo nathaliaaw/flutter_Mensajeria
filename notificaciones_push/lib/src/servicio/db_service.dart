@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:intl/intl.dart';
 import 'package:notificaciones_push/src/models/mensaje_usuario_model.dart';
 import 'package:notificaciones_push/src/models/mesajes_model.dart';
 import 'package:notificaciones_push/src/models/usuario_models.dart';
@@ -126,6 +127,7 @@ class DbService {
             id: message[i]['id'] as int,
             tokenUserSender: message[i]['tokenUserSender'] as String,
             bodyMessage: message[i]['bodyMessage'] as String,
+            creationDate: formatDate(message[i]['creationDate'].toString()) ,
             idMessage: message[i]['idMessage'] as int,
             idUser: message[i]['idUser'] as int,
           );
@@ -136,6 +138,12 @@ class DbService {
     }
   }
 
+  String formatDate(String datestr) {
+    var date = DateTime.parse(datestr);
+
+    String formatteDate=DateFormat('MMM d,h:mm a').format(date);
+    return formatteDate;
+  }
   void deleteUserById(int id) async {
     final bd = await instanceBD;
     await bd!.delete(

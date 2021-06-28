@@ -129,8 +129,21 @@ class _HomePageState extends State<HomePage> {
         return Column(
           children: [
             ListTile(
-              
-              title: Text(elem.usuario),
+              title: Row(
+                children: [
+                  CircleAvatar(
+                      backgroundColor: Colors.white,
+                      radius: 30.0,
+                      child: CircleAvatar(
+                        radius: 25.0,
+                        backgroundImage: NetworkImage(elem.url_avatar),
+                      )),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(elem.usuario),
+                  ),
+                ],
+              ),
               onTap: () {
                 userProv.addUser(elem); // fill provider
 
@@ -145,7 +158,6 @@ class _HomePageState extends State<HomePage> {
       return [];
     }
   }
-
 
   Future<List<UsersModel>> _getUsers() async {
     _usersList = await DbService.dbPublic.getUsers();

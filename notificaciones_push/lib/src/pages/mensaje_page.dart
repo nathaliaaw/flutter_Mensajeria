@@ -38,7 +38,7 @@ class _MessagePageState extends State<MessagePage> {
     _user = userProv.getUser.isNotEmpty ? userProv.getUser : {};
     _message = _user;
     // _getMessages();
-
+    String usuario = _message["usuario"];
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -48,7 +48,7 @@ class _MessagePageState extends State<MessagePage> {
             const SizedBox(
               width: 10.0,
             ),
-            const Text('usuario'),
+            Text('$usuario'),
           ],
         ),
       ),
@@ -184,40 +184,61 @@ class _MessagePageState extends State<MessagePage> {
       return Column(
         children: [
           _mensajesEntrantes(
-              isUser ? Colors.blueGrey : Colors.blueAccent, elem.bodyMessage),
+              isUser ? Colors.blueGrey : Colors.blueAccent, elem,isUser?Alignment.bottomRight:Alignment.bottomLeft),
         ],
       );
     }).toList();
   }
 
-  _mensajesEntrantes(Color colorC, String texto) {
+_mensajesEntrantes(
+    Color colorC,
+    MessageUserModel data,
+    Alignment align,
+  ) {
     return Container(
-      margin: const EdgeInsets.only(top: 10, left: 5, right: 5),
+      alignment: align,
+      margin: const EdgeInsets.only(
+        top: 10,
+        left: 15,
+        right: 15,
+      ),
       constraints: const BoxConstraints(
         maxHeight: double.infinity,
       ),
       decoration: BoxDecoration(
-          color: colorC,
-          // border: Border.all(color: Colors.blueAccent),
-          borderRadius: BorderRadius.circular(20)),
+        color: colorC,
+        borderRadius: BorderRadius.circular(10),
+      ),
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(10),
-            child: Text(
-              texto,
-              softWrap: true,
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 18,
-              ),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  data.bodyMessage,
+                  softWrap: true,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 15,
+                  ),
+                ),
+                Text(
+                  data.creationDate,
+                  softWrap: true,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
   }
-
   Future<List<MessageUserModel>> _getMessages() async {
     _messageList =
         (await DbService.dbPublic.getMessageByIdUser(_message['token']));
